@@ -13,36 +13,24 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+
+
 namespace KristisMatchGame
 {
-    using System.Windows.Threading;
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+
     public partial class MainWindow : Window
     {
-        DispatcherTimer timer = new DispatcherTimer();
-        int tenthsOfSecondsElapsed;
         int matchesFound;
+        int misses;
+        string saveWins;
         public MainWindow()
         {
             InitializeComponent();
 
-            timer.Interval = TimeSpan.FromSeconds(.1);
-            timer.Tick += Timer_Tick;
-
             SetUpGame();
-        }
-
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            tenthsOfSecondsElapsed++;
-            timeTextBlock.Text = (tenthsOfSecondsElapsed / 10F).ToString("0.0s");
-            if (matchesFound == 8)
-            {
-                timer.Stop();
-                timeTextBlock.Text = timeTextBlock.Text + " - Play again?";
-            }
         }
 
         private void SetUpGame()
@@ -61,50 +49,85 @@ namespace KristisMatchGame
             Random random = new Random();
             foreach (TextBlock textBlock in mainGrid.Children.OfType<TextBlock>())
             {
-                if (textBlock.Name != "timeTextBlock")
+                if (textBlock.Name != "consoleTextBlock")
                 {
                     textBlock.Visibility = Visibility.Visible;
+                    textBlock.Background = new SolidColorBrush(Colors.Blue);
+                    textBlock.Foreground = new SolidColorBrush(Colors.Blue);
                     int index = random.Next(animalEmoji.Count);
                     string nextEmoji = animalEmoji[index];
                     textBlock.Text = nextEmoji;
                     animalEmoji.RemoveAt(index);
                 }
+                else
+                {
+                    textBlock.Text = null;
+                }
             }
-            timer.Start();
-            tenthsOfSecondsElapsed = 0;
             matchesFound = 0;
+            misses = 0;
+            saveWins = null;
         }
         TextBlock lastTextBlockClicked;
-        bool findingMatch = false;
+        TextBlock firstTextBlockClicked;
+        bool firstOfPair = true;
 
         private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
         {
             TextBlock textBlock = sender as TextBlock;
-            if (findingMatch == false)
+            int attempts;
+            if (textBlock.Name != "consoleTextBlock")
             {
-                textBlock.Visibility = Visibility.Hidden;
-                lastTextBlockClicked = textBlock;
-                findingMatch = true;
-            }
-            else if (textBlock.Text == lastTextBlockClicked.Text)
-            {
-                matchesFound++;
-                textBlock.Visibility = Visibility.Hidden;
-                findingMatch = false;
+                if (firstOfPair == true)
+                {
+                    firstTextBlockClicked = textBlock;
+                    firstOfPair = false;
+                    firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Black);
+                    firstTextBlockClicked.Background = new SolidColorBrush(Colors.White);
+                }
+                else
+                {
+                    lastTextBlockClicked = textBlock;
+                    firstOfPair = true; // added 10:51pm
+                    lastTextBlockClicked.Background = new SolidColorBrush(Colors.White);
+                    if (firstTextBlockClicked.Text == lastTextBlockClicked.Text)
+                    {
+                        matchesFound++;
+                        saveWins += firstTextBlockClicked.Text;
+                        consoleTextBlock.Text = saveWins;
+                        firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.White);
+                        lastTextBlockClicked.Foreground = new SolidColorBrush(Colors.White);
+                        if (matchesFound == 8)
+                        {
+                            attempts = matchesFound + misses;
+                            consoleTextBlock.Text = attempts + " tries for 8 matches - Play again?";
+                        }
+                    }
+                    else
+                    {
+                        misses++;
+                        firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Red);
+                        lastTextBlockClicked.Foreground = new SolidColorBrush(Colors.Red);
+                        consoleTextBlock.Text = "**FLIP**";
+                    }
+                }
             }
             else
             {
-                lastTextBlockClicked.Visibility = Visibility.Visible;
-                findingMatch = false;
-            }
-        
-        }
-
-        private void TimeTextBlock_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (matchesFound == 8)
-            {
-                SetUpGame();
+                if (matchesFound == 8)
+                {
+                    SetUpGame();
+                }
+                else if (!(lastTextBlockClicked is null))
+                {
+                    lastTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
+                    lastTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
+                    if (!(firstTextBlockClicked is null))
+                    {
+                        firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
+                        firstTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
+                    }
+                }
             }
         }
     }
