@@ -26,6 +26,9 @@ namespace KristisMatchGame
         int matchesFound;
         int misses;
         string saveWins;
+        int clicks; 
+        const string magicWord = "**FLIP**";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -64,34 +67,35 @@ namespace KristisMatchGame
                     textBlock.Text = null;
                 }
             }
+            clicks = 0; 
             matchesFound = 0;
-            misses = 0;
             saveWins = null;
-        }
+            misses = 0;
+         }
         TextBlock lastTextBlockClicked;
         TextBlock firstTextBlockClicked;
-        bool firstOfPair = true;
-
+     
         private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
         {
             TextBlock textBlock = sender as TextBlock;
             int attempts;
             if (textBlock.Name != "consoleTextBlock")
             {
-                if (firstOfPair == true)
+                clicks++; 
+                if (clicks == 1) 
                 {
                     firstTextBlockClicked = textBlock;
-                    firstOfPair = false;
+                    // firstOfPair = false;
                     firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Black);
                     firstTextBlockClicked.Background = new SolidColorBrush(Colors.White);
                 }
-                else
+                else if (clicks == 2) 
                 {
                     lastTextBlockClicked = textBlock;
-                    firstOfPair = true; // added 10:51pm
                     lastTextBlockClicked.Background = new SolidColorBrush(Colors.White);
                     if (firstTextBlockClicked.Text == lastTextBlockClicked.Text)
                     {
+                        clicks = 0; 
                         matchesFound++;
                         saveWins += firstTextBlockClicked.Text;
                         consoleTextBlock.Text = saveWins;
@@ -103,29 +107,34 @@ namespace KristisMatchGame
                             consoleTextBlock.Text = attempts + " tries for 8 matches - Play again?";
                         }
                     }
-                    else
+                    else // 2 clicks but not match
                     {
                         misses++;
                         firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Red);
                         lastTextBlockClicked.Foreground = new SolidColorBrush(Colors.Red);
-                        consoleTextBlock.Text = "**FLIP**";
+                        consoleTextBlock.Text = magicWord;
                     }
                 }
             }
-            else
+            else // consoleTextBlock
             {
-                if (matchesFound == 8)
+                if (textBlock.Text == magicWord)
                 {
-                    SetUpGame();
-                }
-                else if (!(lastTextBlockClicked is null))
-                {
-                    lastTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
-                    lastTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
-                    if (!(firstTextBlockClicked is null))
+                    textBlock.Text = saveWins; // restore saveWins
+                    clicks = 0; 
+                    if (matchesFound == 8)
                     {
-                        firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
-                        firstTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
+                        SetUpGame();
+                    }
+                    else if (!(lastTextBlockClicked is null))
+                    {
+                        lastTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
+                        lastTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
+                        if (!(firstTextBlockClicked is null))
+                        {
+                            firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
+                            firstTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
+                        }
                     }
                 }
             }
