@@ -118,25 +118,19 @@ namespace KristisMatchGame
             }
             else // consoleTextBlock
             {
-                if (textBlock.Text == magicWord)
-                {
-                    textBlock.Text = saveWins; // restore saveWins
-                    clicks = 0; 
                     if (matchesFound == 8)
                     {
                         SetUpGame();
                     }
-                    else if (!(lastTextBlockClicked is null))
+                    else if (textBlock.Text == magicWord)
                     {
                         lastTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
                         lastTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
-                        if (!(firstTextBlockClicked is null))
-                        {
-                            firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
-                            firstTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
-                        }
+                        firstTextBlockClicked.Foreground = new SolidColorBrush(Colors.Blue);
+                        firstTextBlockClicked.Background = new SolidColorBrush(Colors.Blue);
+                        textBlock.Text = saveWins; // restore saveWins
+                        clicks = 0;
                     }
-                }
             }
         }
     }
